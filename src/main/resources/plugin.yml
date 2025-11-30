@@ -1,0 +1,11 @@
+name: OnlinePlayerApi
+version: '${project.version}'
+main: dev.person20020.onlineplayerapi.OnlinePlayerApi
+api-version: '1.21'
+author: 'Person02020'
+depend: [Vault]
+softdepend: [Essentials]
+commands:
+  onlineplayerapi:
+    description: Main command for OnlinePlayerApi
+    usage: /onlineplayerapi <newuser|rmuser>
