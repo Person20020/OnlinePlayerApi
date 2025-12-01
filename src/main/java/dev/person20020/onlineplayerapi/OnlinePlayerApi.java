@@ -22,8 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-import static org.bukkit.Bukkit.getLogger;
-
 public final class OnlinePlayerApi extends JavaPlugin {
 
     private Chat chat = null;
@@ -139,7 +137,6 @@ public final class OnlinePlayerApi extends JavaPlugin {
                 OutputStream os = httpExchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
-                getLogger().info("Received request at path '/api/players' and responded with: " + response);
             });
 
             server.setExecutor(null);

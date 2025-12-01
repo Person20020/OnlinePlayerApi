@@ -8,4 +8,4 @@ softdepend: [Essentials]
 commands:
   onlineplayerapi:
     description: Main command for OnlinePlayerApi
-    usage: /onlineplayerapi <newuser|rmuser>
+    usage: /onlineplayerapi <newuser|rmuser|lsusers>

@@ -33,7 +33,6 @@ public class OnlinePlayerApiCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("Usage:\n/onlineplayerapi newuser <username>");
             return false;
         }
         if (args[0].equalsIgnoreCase("newuser")) {
@@ -47,7 +46,7 @@ public class OnlinePlayerApiCommand implements CommandExecutor {
             File dataFolder = plugin.getDataFolder();
             File apiUsers = new File(dataFolder, "ApiUsers.json");
             if (!apiUsers.exists()) { getLogger().warning("ApiUsers.json not found."); }
-            String content = "";
+            String content;
             try {
                 content = Files.readString(apiUsers.toPath());
             }
@@ -116,13 +115,84 @@ public class OnlinePlayerApiCommand implements CommandExecutor {
             return true;
         }
         else if (args[0].equalsIgnoreCase("rmuser")) {
-            if (args.length != 3 || args[2] != "confirm") {
+            if (args.length != 3 || !args[2].equals("confirm")) {
                 sender.sendMessage(ChatColor.RED + "This will delete the api key for this user and is not reversible!\nRun '/onlineplayerapi rmuser <username> confirm' to delete it.");
             }
             else {
                 String username = args[1];
-                sender.sendMessage(ChatColor.GREEN + "User '" + ChatColor.WHITE + username + ChatColor.GREEN + "' has been deleted.");
+                File dataFolder = plugin.getDataFolder();
+                File apiUsers = new File(dataFolder, "ApiUsers.json");
+                if (!apiUsers.exists()) { getLogger().warning("ApiUsers.json not found."); }
+                String content;
+                try {
+                    content = Files.readString(apiUsers.toPath());
+                }
+                catch (IOException e) {
+                    getLogger().warning("Failed to read ApiUsers.json file.");
+                    return false;
+                }
+                JSONObject apiUsersJson = new JSONObject(content);
+                JSONArray users = apiUsersJson.getJSONArray("users");
+
+                for (int i = 0; i < users.length(); i++) {
+                    JSONObject currentUser = users.getJSONObject(i);
+                    String currentUserName = currentUser.getString("username");
+
+                    if (currentUserName.equalsIgnoreCase(username)) {
+                        // Remove user
+                        users.remove(i);
+                        // Save file
+                        apiUsersJson.clear();
+                        apiUsersJson.put("users", users);
+
+                        Path filePath = dataFolder.toPath().resolve("ApiUsers.json");
+                        try (FileWriter fileWriter = new FileWriter(filePath.toFile())) {
+                            fileWriter.write(apiUsersJson.toString());
+                        }
+                        catch (IOException e) {
+                            getLogger().warning("Failed to write user to file.");
+                            sender.sendMessage("Failed to write user to file.");
+                            return false;
+                        }
+                        sender.sendMessage(ChatColor.GREEN + "User '" + ChatColor.WHITE + username + ChatColor.GREEN + "' has been deleted.");
+                        return true;
+                    }
+                }
+                sender.sendMessage("Could not find user " + username + " to delete.");
             }
+            return true;
+        }
+        else if (args[0].equalsIgnoreCase("lsusers")) {
+            File dataFolder = plugin.getDataFolder();
+            File apiUsers = new File(dataFolder, "ApiUsers.json");
+            if (!apiUsers.exists()) { getLogger().warning("ApiUsers.json not found."); }
+            String content;
+            try {
+                content = Files.readString(apiUsers.toPath());
+            }
+            catch (IOException e) {
+                getLogger().warning("Failed to read ApiUsers.json file.");
+                return false;
+            }
+            JSONObject apiUsersJson = new JSONObject(content);
+            JSONArray users = apiUsersJson.getJSONArray("users");
+
+            if (users.isEmpty()) {
+                sender.sendMessage("No users found.");
+                return true;
+            }
+
+            StringBuilder message = new StringBuilder(users.length() + " users found: \n");
+            for (int i = 0; i < users.length(); i ++) {
+                JSONObject user = users.getJSONObject(i);
+
+                message.append(user.getString("username"));
+                if (i != users.length()) {
+                    message.append("\n");
+                }
+            }
+
+            sender.sendMessage(message.toString());
             return true;
         }
         else {
