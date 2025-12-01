@@ -46,5 +46,4 @@ Example:
 curl https://127.0.0.1:8080/api/players
   -H "X-API-KEY: <api key>"
   -H "accept: application/json"
-  -H "Authorization: Bearer <token>"
 ```
